@@ -4,6 +4,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.BeanFactoryPostProcessor;
+import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.beans.factory.support.AbstractBeanDefinition;
 import org.springframework.beans.factory.support.BeanDefinitionBuilder;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
@@ -65,6 +66,38 @@ public class BeanFactoryTest {
         }
         System.out.println("beanDefinition count: " + beanFactory.getBeanDefinitionCount());
 
+        /*Bean1 bean1 = beanFactory.getBean(Bean1.class);
+        Bean2 bean2 = bean1.getBean2();
+        //此时获取到的bean2是null的，因为@Autowire注解的功能是由 Bean 后处理器完成的，需要启用Bean后处理器增强功能
+        System.out.println("bean1:" + bean1);
+        System.out.println("bean1.bean2:" + bean2);*/
+
+        //bean的后处理器BeanPostProcessor.class，针对bean的生命周期各个阶段提供扩展功能例如 @Autowire @Resource....
+        beanFactory.getBeansOfType(BeanPostProcessor.class).values().forEach(beanFactory::addBeanPostProcessor);
+
+        Bean1 bean1 = beanFactory.getBean(Bean1.class);
+        Bean2 bean2 = bean1.getBean2();
+        //此时可以获取到bean2
+        System.out.println("bean1:" + bean1);
+        System.out.println("bean1.bean2:" + bean2);
+
+        //由日志记录可以了解到，beanFactory并不会第一时间把bean全部创建，而是先记录beanDefinition信息在beanFactory中，
+        //当需要使用bean的时候，才会创建bean。
+        //若想要beanFactory预先实例化bean，可以调用一个方法preInstantiateSingletons()，让beanFactory提前创建单例
+        beanFactory.preInstantiateSingletons();
+
+        /*
+            小结：
+            a. beanFactory 不会做的事情：
+                1.不会主动调用后处理器
+                2.不会主动添加bean后处理器
+                3.不会主动实例化单例bean
+            b.bean 后处理器排序的逻辑？还未学到
+         */
+
+
+
+
     }
 
     @Configuration
@@ -84,7 +117,7 @@ public class BeanFactoryTest {
         public static final Logger log = LoggerFactory.getLogger(Bean1.class);
 
         public Bean1 () {
-            log.debug("Bean1构造");
+            log.info("Bean1构造");
         }
 
         @Autowired
@@ -100,7 +133,7 @@ public class BeanFactoryTest {
         public static final Logger log = LoggerFactory.getLogger(Bean2.class);
 
         public Bean2 () {
-            log.debug("Bean1构造");
+            log.info("Bean2构造");
         }
 
 
