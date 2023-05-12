@@ -61,18 +61,6 @@ public class A01and02_BeanFactoryAndApplicationContext {
         //事件发布,然后在任何一个Spring管理的类中监听都行，记得加上@EventListener的注解
         context.publishEvent(new ChangePasswordEventPublish(context));
 
-
-
-        CipherDemo cipherDemo = new CipherDemo();
-        String zhangzh = cipherDemo.encrypt("zhangzh");
-        String decrypt = cipherDemo.decrypt(zhangzh);
-        System.out.println(zhangzh+ ":" + decrypt);
-
-        //字符串作为密钥加密
-//        String zhangzh1 = cipherDemo.encryptKeyByString("zhangzhencryptKeyByString");
-//        String decrypt1 = cipherDemo.decryptKeyByString(zhangzh);
-//        System.out.println(zhangzh1+ ":" + decrypt1);
-
     }
 
 }
